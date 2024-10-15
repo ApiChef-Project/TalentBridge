@@ -2,6 +2,9 @@
 
 A RESTful API for managing job listings and applications, built with Node.js, Express, and MongoDB.
 
+- [Presentation ](https://docs.google.com/presentation/d/1koaSLvlV7dlSbtDT0RqJIrDIBqMYj1tS/edit?usp=sharing&ouid=116546584301172370696&rtpof=true&sd=true)
+- [Project brief](https://docs.google.com/document/d/1kkGZRDlBjDLtXLB8HnklwDJq66q4GaBm/edit?usp=sharing&ouid=116546584301172370696&rtpof=true&sd=true)
+
 ## Features
 
 - **CRUD Operations**: Create, Read, Update, and Delete job listings.
