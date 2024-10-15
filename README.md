@@ -38,7 +38,7 @@ A RESTful API for managing job listings and applications, built with Node.js, Ex
 2. Navigate into the project directory:
 
     ```bash
-    cd ApiChef
+    cd ApiChef/api
     ```
 
 3. Install dependencies:
