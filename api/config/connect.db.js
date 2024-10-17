@@ -8,7 +8,7 @@ import express from "express";
  *    app server started only after successful db connection
  * @param {number} app_port - Express api port for app
  */
-export const connectMongoDB = (uri, app, app_port) => {
+const connectMongoDB = (uri, app, app_port) => {
   mongoose
     .connect(uri)
     .then(() => {
@@ -22,3 +22,5 @@ export const connectMongoDB = (uri, app, app_port) => {
       console.error(`db connection error: ${error.message}`);
     });
 };
+
+export default connectMongoDB;

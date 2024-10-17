@@ -30,7 +30,7 @@ const applicationSchema = new mongoose.Schema(
       },
     },
 
-    // URL or form data for the cover letter
+    //NOTE: URLs or consider form data?
     coverLetter: {
       type: String,
       validate: {
@@ -51,7 +51,7 @@ const applicationSchema = new mongoose.Schema(
 
 /**
  * Application Model
- * @type {mongoose.Model<Application>}
+ * @type {mongoose.Model}
  */
 const Application = new mongoose.model("Application", applicationSchema);
 

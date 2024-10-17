@@ -78,13 +78,12 @@ const jobSchema = new mongoose.Schema(
       index: true,
     },
 
-    // applications: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Application",
-    //     required: true,
-    //   },
-    // ],
+    applications: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Application",
+      },
+    ],
   },
   { timestamps: true },
 );
