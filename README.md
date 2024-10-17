@@ -1,4 +1,4 @@
-# ApiChef (Jobs API)
+# TalentBridge (Jobs API)
 
 A RESTful API for managing job listings and applications, built with Node.js, Express, and MongoDB.
 
@@ -35,13 +35,13 @@ A RESTful API for managing job listings and applications, built with Node.js, Ex
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/ApiChef-Project/ApiChef.git
+    git clone https://github.com/ApiChef-Project/TalentBridge.git
     ```
 
 2. Navigate into the project directory:
 
     ```bash
-    cd ApiChef/api
+    cd TalentBridge/api
     ```
 
 3. Install dependencies:
