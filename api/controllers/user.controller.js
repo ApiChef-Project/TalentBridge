@@ -20,7 +20,7 @@ export const fetchUser = async (req, res) => {
     res.status(200).json(user);
   } catch (error) {
     if (error.name === "CastError")
-      return res.status(400).json({ error: "Invalid user ID" });
+      return res.status(400).json({ error: "Invalid User ID" });
     console.error(`GET user by id Controller Error: ${error.message}`);
     res.status(500).json({ error: "Internal Server Error" });
   }
@@ -92,7 +92,7 @@ export const updateUser = async (req, res) => {
     res.status(200).json(user);
   } catch (error) {
     if (error.name === "CastError")
-      return res.status(400).json({ error: "Invalid user ID" });
+      return res.status(400).json({ error: "Invalid User ID" });
     if (error.name === "ValidationError")
       return res
         .status(400)
@@ -114,7 +114,7 @@ export const deleteUser = async (req, res) => {
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     if (error.name === "CastError")
-      return res.status(400).json({ error: "Invalid user ID" });
+      return res.status(400).json({ error: "Invalid User ID" });
     console.error(`DELETE user by id Controller Error: ${error.message}`);
     res.status(500).json({ error: "Internal Server Error" });
   }
