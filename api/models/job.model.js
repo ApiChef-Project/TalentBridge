@@ -36,7 +36,6 @@ const jobSchema = new mongoose.Schema(
 
     salaryRange: {
       type: String,
-      default: "Not Specified",
       enum: [
         "Not Specified",
         "Under $50K",
@@ -51,6 +50,7 @@ const jobSchema = new mongoose.Schema(
         "$175K - 200K",
         "Over $200K",
       ],
+      default: "Not Specified",
     },
 
     country: {
@@ -78,12 +78,11 @@ const jobSchema = new mongoose.Schema(
       index: true,
     },
 
-    applications: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Application",
-      },
-    ],
+    applications: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Application",
+      default: [],
+    },
   },
   { timestamps: true },
 );
