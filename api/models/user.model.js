@@ -47,6 +47,12 @@ const userSchema = new mongoose.Schema(
       required: [true, "password is required"],
     },
 
+    applications: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Application",
+      default: [],
+    },
+
     refreshToken: {
       type: String,
       default: "",

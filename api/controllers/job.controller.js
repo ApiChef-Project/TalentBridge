@@ -22,7 +22,7 @@ export const fetchJob = async (req, res) => {
     if (error.name === "CastError")
       return res.status(400).json({ error: "Invalid Job ID" });
     console.error(`GET job by id Controller Error: ${error.message}`);
-    res.status(400).json({ error: "Invalid Job ID" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

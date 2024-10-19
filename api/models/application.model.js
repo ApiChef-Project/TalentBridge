@@ -20,6 +20,13 @@ const applicationSchema = new mongoose.Schema(
       index: true, // Add index for performance
     },
 
+    job: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Job",
+      required: true,
+      index: true,
+    },
+
     // URL or path to the resume file
     resume: {
       type: String,
