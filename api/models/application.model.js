@@ -8,8 +8,9 @@ import Job from "./job.model.js";
  *
  * @typedef {mongoose.Schema}
  * @property {mongoose.Schema.Types.ObjectId} user - Reference to the User model
+ * @property {mongoose.Schema.Types.ObjectId} job - Reference to the Job model
  * @property {string} resume - URL or path to the resume file
- * @property {string} [coverLetter] - URL or form data for the cover letter
+ * @property {string} coverLetter - URL or form data for the cover letter
  * @property {string} status - Status of the application, can be "pending", "accepted", "rejected", or "in-review"
  */
 const applicationSchema = new mongoose.Schema(
@@ -58,52 +59,72 @@ const applicationSchema = new mongoose.Schema(
   { timestamps: true }, // Automatically add createdAt and updatedAt timestamps
 );
 
+/**
+ * Pre-delete hook for the applicationSchema in Mongoose.
+ * This hook is triggered before a single document is deleted from the collection.
+ * It ensures that the application ID is removed from the user's and job's applications arrays.
+ *
+ * @param {Function} next - The next middleware function in the stack.
+ */
 applicationSchema.pre(
   "deleteOne",
   { document: true, query: false },
   async function (next) {
-    const applicationId = this._id;
-    const userId = this.user;
-    const jobId = this.job;
-    console.log("Application preDelOne Hook Fired:", applicationId);
+    try {
+      const applicationId = this._id;
+      const userId = this.user;
+      const jobId = this.job;
 
-    // Remove the application ID from User and Job
-    await User.updateOne(
-      { _id: userId },
-      { $pull: { applications: applicationId } },
-    );
-    await Job.updateOne(
-      { _id: jobId },
-      { $pull: { applications: applicationId } },
-    );
+      // Remove the application ID from User and Job
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { applications: applicationId } },
+      );
+      await Job.updateOne(
+        { _id: jobId },
+        { $pull: { applications: applicationId } },
+      );
 
-    next();
+      next();
+    } catch (error) {
+      next(error);
+    }
   },
 );
 
+/**
+ * Pre-delete hook for the applicationSchema in Mongoose.
+ * This hook is triggered before multiple documents are deleted from the collection.
+ * It ensures that the application IDs are removed from the users' and jobs' applications arrays.
+ *
+ * @param {Function} next - The next middleware function in the stack.
+ */
 applicationSchema.pre("deleteMany", async function (next) {
-  console.log("Application preDelMany Hook Fired");
-  const filter = this.getFilter(); // Get the filter used for deleteMany
+  try {
+    const filter = this.getFilter(); // Get the filter used for deleteMany
 
-  // Find all applications that match the filter to remove their references
-  const applications = await Application.find(filter);
+    // Find all applications that match the filter to remove their references
+    const applications = await Application.find(filter);
 
-  const applicationIds = applications.map((app) => app._id);
-  const userIds = applications.map((app) => app.user);
-  const jobIds = applications.map((app) => app.job);
+    const applicationIds = applications.map((app) => app._id);
+    const userIds = applications.map((app) => app.user);
+    const jobIds = applications.map((app) => app.job);
 
-  // Remove application IDs from the associated users and jobs
-  await User.updateMany(
-    { _id: { $in: userIds } },
-    { $pull: { applications: { $in: applicationIds } } },
-  );
+    // Remove application IDs from the associated users and jobs
+    await User.updateMany(
+      { _id: { $in: userIds } },
+      { $pull: { applications: { $in: applicationIds } } },
+    );
 
-  await Job.updateMany(
-    { _id: { $in: jobIds } },
-    { $pull: { applications: { $in: applicationIds } } },
-  );
+    await Job.updateMany(
+      { _id: { $in: jobIds } },
+      { $pull: { applications: { $in: applicationIds } } },
+    );
 
-  next();
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**

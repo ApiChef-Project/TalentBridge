@@ -111,7 +111,7 @@ export const deleteUser = async (req, res) => {
     }
 
     await user.deleteOne();
-    res.status(200).json({ message: "User deleted successfully" });
+    res.status(204).json({ success: "User deleted successfully" });
   } catch (error) {
     if (error.name === "CastError")
       return res.status(400).json({ error: "Invalid User ID" });

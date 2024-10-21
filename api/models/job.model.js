@@ -14,6 +14,7 @@ import Application from "./application.model.js";
  * @property {String} location - The specific location of the job within the country. It is required.
  * @property {Date} expiresAt - The expiration date of the job posting. It defaults to one year from the current date and time.
  * @property {mongoose.Schema.Types.ObjectId} company - The reference to the Company model. It is required.
+ * @property {Array} - Array of ObjectIds referencing the Application model.
  * @property {Object} timestamps - Automatically adds createdAt and updatedAt timestamps to the schema.
  */
 export const jobSchema = new mongoose.Schema(
@@ -87,33 +88,53 @@ export const jobSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+/**
+ * Pre-delete hook for the jobSchema in Mongoose.
+ * This hook is triggered before a single document is deleted from the collection.
+ * It ensures that all applications associated with the job are deleted before the job itself is removed.
+ *
+ * @param {Function} next - The next middleware function in the stack.
+ */
 jobSchema.pre(
   "deleteOne",
   { document: true, query: false },
   async function (next) {
-    const jobId = this._id;
-    console.log("Job preDelOne Hook Fired", jobId);
+    try {
+      const jobId = this._id;
 
-    // Delete all applications associated with this job
-    await Application.deleteMany({ job: jobId });
+      // Delete all applications associated with this job
+      await Application.deleteMany({ job: jobId });
 
-    next();
+      next();
+    } catch (error) {
+      next(error);
+    }
   },
 );
 
+/**
+ * Pre-delete hook for the jobSchema in Mongoose.
+ * This hook is triggered before multiple documents are deleted from the collection.
+ * It ensures that all applications associated with the jobs are deleted before the jobs themselves are removed.
+ *
+ * @param {Function} next - The next middleware function in the stack.
+ */
 jobSchema.pre(
   "deleteMany",
   { document: true, query: false },
   async function (next) {
-    console.log("Job preDelMany Hook Fired");
-    const filter = this.getFilter();
-    const jobs = await Job.find(filter).exec();
-    const jobIds = jobs.map((job) => job._id);
+    try {
+      const filter = this.getFilter();
+      const jobs = await Job.find(filter).exec();
+      const jobIds = jobs.map((job) => job._id);
 
-    // Batch delete applications with one query
-    await Application.deleteMany({ job: { $in: jobIds } });
+      // Batch delete applications with one query
+      await Application.deleteMany({ job: { $in: jobIds } });
 
-    next();
+      next();
+    } catch (error) {
+      next(error);
+    }
   },
 );
 

@@ -57,29 +57,30 @@ export const companySchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Pre-remove hook on the Company schema
+/**
+ * Pre-delete hook for the companySchema in Mongoose.
+ * This hook is triggered before a single document is deleted from the collection.
+ * It ensures that all jobs associated with the company are deleted before the company itself is removed.
+ *
+ * @param {Function} next - The next middleware function in the stack.
+ */
 companySchema.pre("deleteOne", async function (next) {
-  const filter = this.getQuery(); // Get the filter used for deleteOne
-  //
-  const company = await Company.findOne(filter);
+  try {
+    const filter = this.getQuery(); // Get the filter used for deleteOne
+    //
+    const company = await Company.findOne(filter);
 
-  if (company) {
     const companyId = company._id;
-    console.log("Company preDelOne Hook Fired", companyId);
 
     // Delete all jobs associated with this company
     const jobs = await Job.find({ company: companyId }).exec();
-    console.log(jobs);
-    console.log("Job id", jobs[0]._id);
-    console.log(Array.isArray(jobs));
     for (const job of jobs) {
       await job.deleteOne();
     }
     next();
+  } catch (error) {
+    next(error);
   }
-
-  // Proceed with removing the company
-  next();
 });
 /**
  * The Company model based on the companySchema.
