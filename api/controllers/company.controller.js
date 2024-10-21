@@ -97,15 +97,13 @@ export const updateCompany = async (req, res) => {
 };
 
 export const deleteCompany = async (req, res) => {
+  console.log("We in here");
+  const { id } = req.params;
   try {
-    const { id } = req.params;
     const company = await Company.findById(id);
-    if (!company) {
-      return res.status(404).json({ error: "Company not found" });
-    }
-
-    await company.remove();
-    res.status(200).json({ message: "Company deleted successfully" });
+    if (!company) return res.status(400).json({ error: "Company Not Found" });
+    await company.deleteOne();
+    return res.status(200).json({ message: "Successfully Deleted Company" });
   } catch (error) {
     if (error.name === "CastError")
       return res.status(400).json({ error: "Invalid Company ID" });

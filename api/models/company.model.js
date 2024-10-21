@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import Job from "./job.model.js";
 
 /**
  * Defines the schema for the Company model.
@@ -12,7 +13,7 @@ import validator from "validator";
  * @property {String} phone - The phone number of the company. It must be a valid phone number format.
  * @property {Object} timestamps - Automatically adds createdAt and updatedAt timestamps to the schema.
  */
-const companySchema = new mongoose.Schema(
+export const companySchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -56,6 +57,30 @@ const companySchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// Pre-remove hook on the Company schema
+companySchema.pre("deleteOne", async function (next) {
+  const filter = this.getQuery(); // Get the filter used for deleteOne
+  //
+  const company = await Company.findOne(filter);
+
+  if (company) {
+    const companyId = company._id;
+    console.log("Company preDelOne Hook Fired", companyId);
+
+    // Delete all jobs associated with this company
+    const jobs = await Job.find({ company: companyId }).exec();
+    console.log(jobs);
+    console.log("Job id", jobs[0]._id);
+    console.log(Array.isArray(jobs));
+    for (const job of jobs) {
+      await job.deleteOne();
+    }
+    next();
+  }
+
+  // Proceed with removing the company
+  next();
+});
 /**
  * The Company model based on the companySchema.
  *

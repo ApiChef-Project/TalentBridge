@@ -1,4 +1,5 @@
 import Job from "../models/job.model.js";
+import Company from "../models/company.model.js";
 
 export const fetchJobs = async (req, res) => {
   try {
@@ -82,10 +83,10 @@ export const createJob = async (req, res) => {
 export const deleteJob = async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await Job.deleteOne({ _id: id });
-    if (result.deletedCount === 1)
-      return res.status(204).json({ success: "Successfully Deleted Job" });
-    else return res.status(400).json({ error: "Invalid Job ID" });
+    const job = await Job.findOne({ _id: id });
+    if (!job) return res.status(400).json({ error: "Job Not Found" });
+    await job.deleteOne({ _id: id });
+    return res.status(204).json({ success: "Successfully Deleted Job" });
   } catch (error) {
     if (error.name === "CastError")
       return res.status(400).json({ error: "Invalid Job ID" });

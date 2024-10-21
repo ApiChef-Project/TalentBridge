@@ -15,7 +15,7 @@ export const fetchApplications = async (req, res) => {
 export const fetchApplication = async (req, res) => {
   try {
     const { id } = req.params;
-    const application = await Application.findById(id);
+    const application = await Application.findOne({ _id: id });
     if (!application) {
       return res.status(404).json({ error: "Application not found" });
     }
@@ -114,21 +114,11 @@ export const deleteApplication = async (req, res) => {
   try {
     const application = await Application.findOne({ _id: id });
     if (!application)
-      return res.status(404).json({ error: "Application Not Found" });
-
-    const job = await Job.findById(application.job);
-    const user = await User.findById(application.user);
-    await job.applications.pop(application);
-    await job.save();
-    await user.applications.pop(application);
-    await user.save();
-
-    const result = await Application.deleteOne({ _id: id });
-    if (result.deletedCount === 1)
-      return res
-        .status(204)
-        .json({ success: "Successfully Deleted Application" });
-    else return res.status(400).json({ error: "Invalid Application ID" });
+      return res.status(400).json({ error: "Application Not Found" });
+    const result = await application.deleteOne();
+    return res
+      .status(204)
+      .json({ success: "Successfully Deleted Application" });
   } catch (error) {
     if (error.name === "CastError")
       return res.status(400).json({ error: "Invalid Application ID" });

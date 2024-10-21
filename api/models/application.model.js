@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import User from "./user.model.js";
+import Job from "./job.model.js";
 
 /**
  * Defines the Schema for an Application model
@@ -55,6 +57,54 @@ const applicationSchema = new mongoose.Schema(
   },
   { timestamps: true }, // Automatically add createdAt and updatedAt timestamps
 );
+
+applicationSchema.pre(
+  "deleteOne",
+  { document: true, query: false },
+  async function (next) {
+    const applicationId = this._id;
+    const userId = this.user;
+    const jobId = this.job;
+    console.log("Application preDelOne Hook Fired:", applicationId);
+
+    // Remove the application ID from User and Job
+    await User.updateOne(
+      { _id: userId },
+      { $pull: { applications: applicationId } },
+    );
+    await Job.updateOne(
+      { _id: jobId },
+      { $pull: { applications: applicationId } },
+    );
+
+    next();
+  },
+);
+
+applicationSchema.pre("deleteMany", async function (next) {
+  console.log("Application preDelMany Hook Fired");
+  const filter = this.getFilter(); // Get the filter used for deleteMany
+
+  // Find all applications that match the filter to remove their references
+  const applications = await Application.find(filter);
+
+  const applicationIds = applications.map((app) => app._id);
+  const userIds = applications.map((app) => app.user);
+  const jobIds = applications.map((app) => app.job);
+
+  // Remove application IDs from the associated users and jobs
+  await User.updateMany(
+    { _id: { $in: userIds } },
+    { $pull: { applications: { $in: applicationIds } } },
+  );
+
+  await Job.updateMany(
+    { _id: { $in: jobIds } },
+    { $pull: { applications: { $in: applicationIds } } },
+  );
+
+  next();
+});
 
 /**
  * Application Model

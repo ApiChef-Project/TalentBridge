@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
-// import Company from "./company.model";
+import Application from "./application.model.js";
 
 /**
  * Defines the schema for the Job model.
@@ -16,7 +16,7 @@ import validator from "validator";
  * @property {mongoose.Schema.Types.ObjectId} company - The reference to the Company model. It is required.
  * @property {Object} timestamps - Automatically adds createdAt and updatedAt timestamps to the schema.
  */
-const jobSchema = new mongoose.Schema(
+export const jobSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -85,6 +85,36 @@ const jobSchema = new mongoose.Schema(
     },
   },
   { timestamps: true },
+);
+
+jobSchema.pre(
+  "deleteOne",
+  { document: true, query: false },
+  async function (next) {
+    const jobId = this._id;
+    console.log("Job preDelOne Hook Fired", jobId);
+
+    // Delete all applications associated with this job
+    await Application.deleteMany({ job: jobId });
+
+    next();
+  },
+);
+
+jobSchema.pre(
+  "deleteMany",
+  { document: true, query: false },
+  async function (next) {
+    console.log("Job preDelMany Hook Fired");
+    const filter = this.getFilter();
+    const jobs = await Job.find(filter).exec();
+    const jobIds = jobs.map((job) => job._id);
+
+    // Batch delete applications with one query
+    await Application.deleteMany({ job: { $in: jobIds } });
+
+    next();
+  },
 );
 
 /**

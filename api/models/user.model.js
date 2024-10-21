@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import Application from "./application.model.js";
 
 /**
  * Defines the schema for the User model.
@@ -12,7 +13,7 @@ import validator from "validator";
  * @property {String} hashedPassword - The hashed password for the user's account. It is required.
  * @property {Object} timestamps - Automatically adds createdAt and updatedAt timestamps to the schema.
  */
-const userSchema = new mongoose.Schema(
+export const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -59,6 +60,20 @@ const userSchema = new mongoose.Schema(
     },
   },
   { timestamps: true },
+);
+
+userSchema.pre(
+  "deleteOne",
+  { document: true, query: false },
+  async function (next) {
+    const userId = this._id;
+    console.log("Delete Hook Fired For User", userId);
+
+    // Delete all applications associated with this user
+    await Application.deleteMany({ user: userId });
+
+    next();
+  },
 );
 
 /**
