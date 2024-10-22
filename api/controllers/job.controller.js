@@ -56,6 +56,11 @@ export const createJob = async (req, res) => {
       return res.status(400).json({ error: "Company Not Found" });
     }
 
+    // Check that user attached to session has authority to add job
+    const user = req.user;
+    if (!company.authorizedEmails.includes(user.email))
+      return res.sendStatus(403);
+
     const newJob = new Job({
       title,
       type,
@@ -81,10 +86,17 @@ export const createJob = async (req, res) => {
 };
 
 export const deleteJob = async (req, res) => {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
     const job = await Job.findOne({ _id: id });
     if (!job) return res.status(400).json({ error: "Job Not Found" });
+
+    // Check that user attached to session has authority to delete job
+    const company = await Company.findById(job.company);
+    const user = req.user;
+    if (!company.authorizedEmails.includes(user.email))
+      return res.sendStatus(403);
+
     await job.deleteOne({ _id: id });
     return res.status(204).json({ success: "Successfully Deleted Job" });
   } catch (error) {
@@ -98,25 +110,11 @@ export const deleteJob = async (req, res) => {
 export const updateJob = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      title,
-      salaryRange,
-      type,
-      description,
-      country,
-      location,
-      company_id,
-    } = req.body;
+    const { title, salaryRange, type, description, country, location } =
+      req.body;
 
     // Validate request data
-    if (
-      !title ||
-      !type ||
-      !description ||
-      !country ||
-      !location ||
-      !company_id
-    ) {
+    if (!title || !type || !description || !country || !location) {
       return res.status(400).json({ error: "All fields are required" });
     }
     const job = await Job.findById(id);
@@ -127,12 +125,16 @@ export const updateJob = async (req, res) => {
       return res.status(400).json({ error: "Company Not Found" });
     }
 
+    // Check that user attached to session has authority to delete job
+    const user = req.user;
+    if (!company.authorizedEmails.includes(user.email))
+      return res.sendStatus(403);
+
     job.title = title;
     job.type = type;
     job.description = description;
     job.country = country;
     job.location = location;
-    job.company = company;
     job.salaryRange = salaryRange;
 
     await job.save();
