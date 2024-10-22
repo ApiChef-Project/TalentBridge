@@ -1,8 +1,9 @@
+import { hashPassword } from "../lib/utils.js";
 import Company from "../models/company.model.js";
 
 export const fetchCompanies = async (req, res) => {
   try {
-    const companies = await Company.find({});
+    const companies = await Company.find({}).select("-hashedPassword");
     res.status(200).json(companies);
   } catch (error) {
     console.error(`GET all companies Controller Error: ${error.message}`);
@@ -13,7 +14,7 @@ export const fetchCompanies = async (req, res) => {
 export const fetchCompany = async (req, res) => {
   try {
     const { id } = req.params;
-    const company = await Company.findById(id);
+    const company = await Company.findById(id).select("-hashedPassword");
     if (!company) {
       return res.status(404).json({ error: "Company not found" });
     }
@@ -42,15 +43,21 @@ export const registerCompany = async (req, res) => {
         .json({ error: `Company with email ${email} already exists` });
     }
 
+    const hashedPassword = await hashPassword(password);
+
     const newCompany = new Company({
       name,
       description,
       email,
-      hashedPassword: password, // Assuming password is hashed before saving
+      hashedPassword,
       phone,
     });
     await newCompany.save();
-    res.status(201).json(newCompany);
+
+    const userResponse = newCompany.toObject();
+    delete userResponse.hashedPassword;
+
+    res.status(201).json(userResponse);
   } catch (error) {
     if (error.name === "ValidationError")
       return res
@@ -76,14 +83,19 @@ export const updateCompany = async (req, res) => {
       return res.status(404).json({ error: "Company not found" });
     }
 
+    const hashedPassword = await hashPassword(password);
     company.name = name;
     company.description = description;
     company.email = email;
-    company.hashedPassword = password;
+    company.hashedPassword = hashedPassword;
     company.phone = phone;
 
     await company.save();
-    res.status(200).json(company);
+
+    const userResponse = company.toObject();
+    delete userResponse.hashedPassword;
+
+    res.status(200).json(userResponse);
   } catch (error) {
     if (error.name === "ValidationError")
       return res

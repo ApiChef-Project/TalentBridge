@@ -4,7 +4,6 @@ import {
   deleteUser,
   fetchAllUsers,
   fetchUser,
-  registerUser,
   updateUser,
 } from "../controllers/user.controller.js";
 
@@ -15,9 +14,6 @@ userRoutes.get("/", fetchAllUsers);
 
 // Get user by ID
 userRoutes.get("/:id", fetchUser);
-
-// Create a new user (sign up)
-userRoutes.post("/register", registerUser);
 
 // Update user by ID
 userRoutes.put("/:id", updateUser);

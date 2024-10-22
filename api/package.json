@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "reset": "ENV=dev node config/drop.db.js",
+    "reset": "node config/drop.db.js",
     "start": "nodemon app.js"
   },
   "author": "",
