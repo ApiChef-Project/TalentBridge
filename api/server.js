@@ -1,31 +1,16 @@
-import express from "express";
-import dotenv from "dotenv";
-import userRoutes from "./routes/user.routes.js";
-import companyRoutes from "./routes/company.routes.js";
-import jobRoutes from "./routes/job.routes.js";
-import applicationRoutes from "./routes/application.routes.js";
-import authRoutes from "./routes/auth.routes.js";
-import cookieParser from "cookie-parser";
+import { config } from "dotenv";
+import { fileURLToPath } from "url";
+import path, { dirname } from "path";
+import app from "./app.js";
+import connectMongoDB from "./config/connect.db.js";
+import { resolveCurrentPath } from "./lib/utils.js";
 
-/** @typedef {Express} */
-const app = express();
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
-app.get("/", (req, res) => {
-  res.status(200).json({ status: "OK" });
+const __dirname = resolveCurrentPath(import.meta.url);
+config({
+  path: path.join(__dirname, "..", "api", ".env"),
 });
 
-app.use("/users", userRoutes);
+const DB_URI = process.env.DB_URI || "mongodb://127.0.0.1:27017/TalentBridge";
+const API_PORT = process.env.API_PORT || 3000;
 
-app.use("/auth", authRoutes);
-
-app.use("/companies", companyRoutes);
-
-app.use("/jobs", jobRoutes);
-
-app.use("/applications", applicationRoutes);
-
-export default app;
+connectMongoDB(DB_URI, app, API_PORT);

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "reset": "node config/drop.db.js",
-    "start": "nodemon app.js"
+    "start": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",
