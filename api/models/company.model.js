@@ -38,13 +38,20 @@ export const companySchema = new mongoose.Schema(
       },
     },
 
+    // the super password, needed for updating and deleting company
     hashedPassword: {
       type: String,
       minLength: 8,
       required: true,
     },
 
-    //TODO: non-superadmin authentication
+    // can do everything else
+    authorizedEmails: {
+      type: [String],
+      required: true,
+      lowercase: true,
+      default: [],
+    },
 
     phone: {
       type: String,

@@ -2,6 +2,11 @@ import Application from "../models/application.model.js";
 import Job from "../models/job.model.js";
 import User from "../models/user.model.js";
 
+/**
+ * Fetch all applications.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const fetchApplications = async (req, res) => {
   try {
     const applications = await Application.find({});
@@ -12,6 +17,11 @@ export const fetchApplications = async (req, res) => {
   }
 };
 
+/**
+ * Fetch a single application by ID.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const fetchApplication = async (req, res) => {
   try {
     const { id } = req.params;
@@ -28,6 +38,11 @@ export const fetchApplication = async (req, res) => {
   }
 };
 
+/**
+ * Create a new application.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const createApplication = async (req, res) => {
   try {
     const { user_id, job_id, resume, coverLetter } = req.body;
@@ -62,10 +77,13 @@ export const createApplication = async (req, res) => {
     });
 
     await newApplication.save();
+
+    // Associate application to user and job
     await user.applications.push(newApplication._id);
     await user.save();
     await job.applications.push(newApplication._id);
     await job.save();
+
     res.status(201).json(newApplication);
   } catch (error) {
     if (error.name === "ValidationError")
@@ -79,6 +97,11 @@ export const createApplication = async (req, res) => {
   }
 };
 
+/**
+ * Update an existing application.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const updateApplication = async (req, res) => {
   try {
     const { id } = req.params;
@@ -109,6 +132,11 @@ export const updateApplication = async (req, res) => {
   }
 };
 
+/**
+ * Delete an application by ID.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const deleteApplication = async (req, res) => {
   const { id } = req.params;
   try {

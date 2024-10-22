@@ -1,4 +1,4 @@
-import { hashPassword } from "../lib/utils.js";
+import { checkPassword, hashPassword } from "../lib/utils.js";
 import Company from "../models/company.model.js";
 
 export const fetchCompanies = async (req, res) => {
@@ -30,6 +30,8 @@ export const fetchCompany = async (req, res) => {
 export const registerCompany = async (req, res) => {
   try {
     const { name, description, email, password, phone } = req.body;
+    console.log("req.body", req.body);
+    console.log("req.user", req.user);
 
     // Validation
     if (!name || !description || !email || !password || !phone) {
@@ -45,15 +47,21 @@ export const registerCompany = async (req, res) => {
 
     const hashedPassword = await hashPassword(password);
 
+    const user = req.user;
+    // const authorizedEmails = user.email;
+
     const newCompany = new Company({
       name,
       description,
       email,
       hashedPassword,
+      authorizedEmails: [user.email],
       phone,
     });
+    console.log(newCompany);
     await newCompany.save();
 
+    // Remove the hashed password from the response
     const userResponse = newCompany.toObject();
     delete userResponse.hashedPassword;
 
@@ -70,11 +78,21 @@ export const registerCompany = async (req, res) => {
 
 export const updateCompany = async (req, res) => {
   try {
+    const user = req.user;
     const { id } = req.params;
-    const { name, description, email, password, phone } = req.body;
+    /**
+     * the superPassword is the company's password in the db
+     * you'd need to pass the correct password before you can alter anything
+     *      about the company information
+     * TODO: What if they've forgotten the password, how to reset?
+     */
+    const { name, description, email, password, phone, superPassword } =
+      req.body;
 
     // Validate request data
-    if (!name || !description || !email || !password || !phone) {
+    if (
+      (!superPassword, !name || !description || !email || !password || !phone)
+    ) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -82,6 +100,12 @@ export const updateCompany = async (req, res) => {
     if (!company) {
       return res.status(404).json({ error: "Company not found" });
     }
+
+    // Check that the user is authorized by company and passed valid password
+    if (!company.authorizedEmails.includes(user.email))
+      return res.sendStatus(403);
+    if (!checkPassword(superPassword, company.hashedPassword))
+      return res.sendStatus(403);
 
     const hashedPassword = await hashPassword(password);
     company.name = name;
@@ -109,10 +133,27 @@ export const updateCompany = async (req, res) => {
 };
 
 export const deleteCompany = async (req, res) => {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
+    const { superPassword } = req.body;
+    const { user } = req.user;
+
+    //Validate request data
+    if (!superPassword) {
+      return res
+        .status(400)
+        .json({ error: "Company Super password is required" });
+    }
+
     const company = await Company.findById(id);
     if (!company) return res.status(400).json({ error: "Company Not Found" });
+
+    // Check that the user is authorized by company and passed valid password
+    if (!company.authorizedEmails.includes(user.email))
+      return res.sendStatus(403);
+    if (!checkPassword(superPassword, company.hashedPassword))
+      return res.sendStatus(403);
+
     await company.deleteOne();
     return res.status(204).json({ success: "Successfully Deleted Company" });
   } catch (error) {

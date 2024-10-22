@@ -7,6 +7,7 @@ import {
   registerCompany,
   updateCompany,
 } from "../controllers/company.controller.js";
+import { protectRoute } from "../middleware/auth.middleware.js";
 
 const companyRoutes = Router();
 
@@ -17,12 +18,12 @@ companyRoutes.get("/", fetchCompanies);
 companyRoutes.get("/:id", fetchCompany);
 
 // POST create a new company
-companyRoutes.post("/", registerCompany);
+companyRoutes.post("/", protectRoute, registerCompany);
 
 // PUT update company by ID
-companyRoutes.put("/:id", updateCompany);
+companyRoutes.put("/:id", protectRoute, updateCompany);
 
 // DELETE company by ID
-companyRoutes.delete("/:id", deleteCompany);
+companyRoutes.delete("/:id", protectRoute, deleteCompany);
 
 export default companyRoutes;
