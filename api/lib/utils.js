@@ -5,6 +5,8 @@ import pkg from "bcryptjs";
 const { hash, genSalt, compare } = pkg;
 import jwt from "jsonwebtoken";
 
+config();
+
 /**
  * Function: resolveCurrentPath
  * Resolves the current file path.
