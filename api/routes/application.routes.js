@@ -1,5 +1,4 @@
 import { Router } from "express";
-import Application from "../models/application.model.js";
 import {
   createApplication,
   deleteApplication,

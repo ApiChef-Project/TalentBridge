@@ -1,6 +1,4 @@
 import { Router } from "express";
-import Job from "../models/job.model.js";
-import Company from "../models/company.model.js";
 import {
   createJob,
   deleteJob,

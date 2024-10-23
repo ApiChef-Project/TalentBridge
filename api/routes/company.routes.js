@@ -1,5 +1,4 @@
 import { Router } from "express";
-import Company from "../models/company.model.js";
 import {
   deleteCompany,
   fetchCompanies,
