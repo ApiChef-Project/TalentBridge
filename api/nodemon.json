@@ -1,5 +1,8 @@
 {
   "events": {
     "start": "cls || clear"
-  }
+  },
+  "ignore": [
+    "./tests/*"
+  ]
 }
