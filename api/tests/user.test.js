@@ -3,74 +3,33 @@ import app from "../app";
 import { config } from "dotenv";
 import connectMongoDB from "../config/connect.db.js";
 import mongoose from "mongoose";
+import { user1payload, user2payload } from "./mockData";
 
 config();
 const DB_URI = process.env.DB_URI || "mongodb://127.0.0.1:27017/TalentBridge";
-// connecting to mongoDB
-await connectMongoDB(DB_URI, false);
 
-const user1payload = {
-	firstName: "anas",
-	lastName: "asimi",
-	email: "anas2020cr7@gmail.com",
-	phone: "0123456789",
-	password: "anas123",
-};
 let user1ID;
 let newEmail = "new-email@gmail.com";
-const user2payload = {
-	firstName: "anas2",
-	lastName: "asimi2",
-	email: "anas3030@gmail.com",
-	phone: "00000000",
-	password: "anas456",
-};
 
-// droping the database
 beforeAll(async () => {
+	// connecting to mongoDB
+	await connectMongoDB(DB_URI, false);
+	// droping the database
 	await mongoose.connection.dropDatabase();
+	// creating an user
+	const response = await request(app).post("/auth/signup").send(user1payload);
+	user1ID = response.body._id;
+});
+
+afterAll(async () => {
+	// closing the database
+	await mongoose.connection.close();
 });
 
 describe("GET /", () => {
 	it("responds with 200 status code", async () => {
 		const response = await request(app).get("/");
 		expect(response.statusCode).toBe(200);
-	});
-});
-
-describe("POST /auth/signup", () => {
-	it("create a new user", async () => {
-		const response = await request(app)
-			.post("/auth/signup")
-			.send(user1payload);
-		const payloadWithoutPassword = { ...user1payload };
-		delete payloadWithoutPassword["password"];
-		expect(response.statusCode).toBe(201);
-		expect(response.body).toMatchObject(payloadWithoutPassword);
-		user1ID = response.body._id;
-	});
-});
-
-describe("POST /auth/signup", () => {
-	it('return { error: "All fields are required" }', async () => {
-		const response = await request(app).post("/auth/signup");
-		expect(response.statusCode).toBe(400);
-		expect(response.body).toStrictEqual({
-			error: "All fields are required",
-		});
-	});
-});
-
-describe("POST /auth/signup", () => {
-	it('return {error: "User with email anas2020cr7@gmail.com already exists"}', async () => {
-		const response = await request(app)
-			.post("/auth/signup")
-			.send(user1payload)
-			.set("Content-Type", "application/json");
-		expect(response.statusCode).toBe(400);
-		expect(response.body).toStrictEqual({
-			error: "User with email anas2020cr7@gmail.com already exists",
-		});
 	});
 });
 
@@ -137,9 +96,4 @@ describe("DELETE /users/:id", () => {
 		response = await request(app).get("/users");
 		expect(response.body).toHaveLength(usersCount - 1);
 	});
-});
-
-// closing the database
-afterAll(async () => {
-	await mongoose.connection.close();
 });
