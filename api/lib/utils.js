@@ -20,8 +20,8 @@ config();
  * @returns {string} The directory name of the current module file.
  */
 export const resolveCurrentPath = (moduleURL) => {
-  const __filename = fileURLToPath(moduleURL);
-  return dirname(__filename);
+	const __filename = fileURLToPath(moduleURL);
+	return dirname(__filename);
 };
 
 /**
@@ -32,9 +32,9 @@ export const resolveCurrentPath = (moduleURL) => {
  * @returns {string} hashedPassword
  */
 export const hashPassword = async (password) => {
-  const salt = await genSalt(10);
-  const hashedPassword = await hash(password, salt);
-  return hashedPassword;
+	const salt = await genSalt(10);
+	const hashedPassword = await hash(password, salt);
+	return hashedPassword;
 };
 
 /**
@@ -47,7 +47,7 @@ export const hashPassword = async (password) => {
  * @returns {boolean} passedPassword valid or not
  */
 export const checkPassword = async (password, dbPassword) =>
-  await compare(password, dbPassword);
+	await compare(password, dbPassword);
 
 /**
  * Function: generateTokenandSetCookie
@@ -58,15 +58,29 @@ export const checkPassword = async (password, dbPassword) =>
  * @returns {Promise<void>}
  */
 export const generateTokenandSetCookie = async (userID, res) => {
-  const __dirname = resolveCurrentPath(import.meta.url);
-  config({ path: path.join(__dirname, "..", "..", ".env") });
-  const token = jwt.sign({ userID }, process.env.JWT_SECRET, {
-    expiresIn: "15d",
-  });
-  res.cookie("jwt", token, {
-    maxAge: 15 * 24 * 60 * 100, //ms
-    httpOnly: true,
-    sameSite: "strict",
-    secure: process.env.ENVIRONMENT != "dev",
-  });
+	const __dirname = resolveCurrentPath(import.meta.url);
+	config({ path: path.join(__dirname, "..", "..", ".env") });
+	const token = jwt.sign({ userID }, process.env.JWT_SECRET, {
+		expiresIn: "15d",
+	});
+	res.cookie("jwt", token, {
+		maxAge: 15 * 24 * 60 * 100, //ms
+		httpOnly: true,
+		sameSite: "strict",
+		secure: process.env.ENVIRONMENT != "dev",
+	});
+};
+
+export const objectToCookieString = (obj) => {
+	return Object.entries(obj)
+		.map(([key, value]) => `${key}=${value}`)
+		.join("; ");
+};
+
+export const cookieStringToObject = (cookieString) => {
+	return cookieString.split("; ").reduce((acc, cookie) => {
+		const [key, value] = cookie.split("=");
+		acc[key] = value;
+		return acc;
+	}, {});
 };
