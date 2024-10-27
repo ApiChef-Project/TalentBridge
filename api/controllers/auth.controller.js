@@ -56,8 +56,7 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: "Invalid Login!" });
 
-    const isPasswordValid = await checkPassword(password, user.hashedPassword);
-    if (!isPasswordValid)
+    if (!checkPassword(password, user.hashedPassword))
       return res.status(401).json({ error: "Invalid Login!" });
 
     generateTokenandSetCookie(user._id, res);
