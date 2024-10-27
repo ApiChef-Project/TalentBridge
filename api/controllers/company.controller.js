@@ -76,19 +76,15 @@ export const updateCompany = async (req, res) => {
   try {
     const user = req.user;
     const { id } = req.params;
-    /**
-     * the superPassword is the company's password in the db
-     * you'd need to pass the correct password before you can alter anything
-     *      about the company information
-     * TODO: What if they've forgotten the password, how to reset?
-     */
-    const { name, description, email, password, phone, superPassword } =
-      req.body;
+		/**
+		 * TODO: What if they've forgotten the password, how to reset?
+		 ** They will request a new password, which will then be sent to their email
+		 ** And we'll add a feature for users to change their passwords by old one.
+		 */
+    const { name, description, email, password, phone } = req.body;
 
     // Validate request data
-    if (
-      (!superPassword, !name || !description || !email || !password || !phone)
-    ) {
+    if (!name || !description || !email || !password || !phone) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -99,15 +95,17 @@ export const updateCompany = async (req, res) => {
 
     // Check that the user is authorized by company and passed valid password
     if (!company.authorizedEmails.includes(user.email))
-      return res.sendStatus(403);
-    if (!checkPassword(superPassword, company.hashedPassword))
-      return res.sendStatus(403);
+      return res.status(403).json({ error: "User is not authorized by company" });
+    // Check that the user passed valid company password
+    let isValidPassword = await checkPassword(password, company.hashedPassword);
+	  if (!isValidPassword)
+		  return res.status(403).json({ error: "Invalid Password!" });
 
-    const hashedPassword = await hashPassword(password);
+    // const hashedPassword = await hashPassword(password);
     company.name = name;
     company.description = description;
     company.email = email;
-    company.hashedPassword = hashedPassword;
+    // company.hashedPassword = hashedPassword;
     company.phone = phone;
 
     await company.save();
@@ -131,24 +129,26 @@ export const updateCompany = async (req, res) => {
 export const deleteCompany = async (req, res) => {
   try {
     const { id } = req.params;
-    const { superPassword } = req.body;
-    const { user } = req.user;
+    const { password } = req.body;
+    const user = req.user;
 
     //Validate request data
-    if (!superPassword) {
+    if (!password) {
       return res
         .status(400)
-        .json({ error: "Company Super password is required" });
+        .json({ error: "Company password is required" });
     }
 
     const company = await Company.findById(id);
     if (!company) return res.status(400).json({ error: "Company Not Found" });
 
-    // Check that the user is authorized by company and passed valid password
+    // Check that the user is authorized by company
     if (!company.authorizedEmails.includes(user.email))
-      return res.sendStatus(403);
-    if (!checkPassword(superPassword, company.hashedPassword))
-      return res.sendStatus(403);
+      return res.status(403).json({ error: "User is not authorized!" });
+    // Check that the user passed valid company password
+    let isValidPassword = await checkPassword(password, company.hashedPassword)
+    if (!isValidPassword)
+		return res.status(403).json({ error: "Invalid Password!" });
 
     await company.deleteOne();
     return res.status(204).json({ success: "Successfully Deleted Company" });
