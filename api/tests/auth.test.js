@@ -58,7 +58,7 @@ describe("POST /auth/signup", () => {
 			.send(user1payload);
 		expect(response.statusCode).toBe(400);
 		expect(response.body).toStrictEqual({
-			error: "User with email anas2020cr7@gmail.com already exists",
+			error: `User with email ${user1payload.email} already exists`,
 		});
 	});
 });
