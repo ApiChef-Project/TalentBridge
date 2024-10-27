@@ -30,8 +30,6 @@ export const fetchCompany = async (req, res) => {
 export const registerCompany = async (req, res) => {
   try {
     const { name, description, email, password, phone } = req.body;
-    console.log("req.body", req.body);
-    console.log("req.user", req.user);
 
     // Validation
     if (!name || !description || !email || !password || !phone) {
@@ -48,7 +46,6 @@ export const registerCompany = async (req, res) => {
     const hashedPassword = await hashPassword(password);
 
     const user = req.user;
-    // const authorizedEmails = user.email;
 
     const newCompany = new Company({
       name,
@@ -58,7 +55,6 @@ export const registerCompany = async (req, res) => {
       authorizedEmails: [user.email],
       phone,
     });
-    console.log(newCompany);
     await newCompany.save();
 
     // Remove the hashed password from the response
