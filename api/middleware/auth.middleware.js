@@ -25,8 +25,10 @@ export const protectRoute = async (req, res, next) => {
 
     // Find attach(relate) user to current session
     const user = await User.findById(decoded.userID);
-    req.user = user;
+    if (!user)
+		  return res.status(401).json({ error: "Unauthorized: Invalid Token" });
 
+    req.user = user;
     next();
   } catch (error) {
     if (error.name === "JsonWebTokenError") {
