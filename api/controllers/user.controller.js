@@ -1,4 +1,4 @@
-import { hashPassword } from "../lib/utils.js";
+import { checkPassword, hashPassword } from "../lib/utils.js";
 import User from "../models/user.model.js";
 
 export const fetchAllUsers = async (req, res) => {
@@ -37,18 +37,22 @@ export const updateUser = async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const user = await User.findById(id).select("-hashedPassword");
+    const user = await User.findById(id);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: "User not found!" });
     }
 
-    const hashedPassword = await hashPassword(password);
+    // Check that the user passed valid password
+    let isValidPassword = await checkPassword(password, user.hashedPassword);
+	  if (!isValidPassword)
+		  return res.status(403).json({ error: "Invalid Password!" });
 
+    // const hashedPassword = await hashPassword(password);
     user.firstName = firstName;
     user.lastName = lastName;
     user.email = email;
     user.phone = phone;
-    user.hashedPassword = hashedPassword;
+    // user.hashedPassword = hashedPassword;
 
     await user.save();
 
@@ -58,7 +62,7 @@ export const updateUser = async (req, res) => {
     res.status(200).json(userResponse);
   } catch (error) {
     if (error.name === "CastError")
-      return res.status(400).json({ error: "Invalid User ID" });
+      return res.status(400).json({ error: "Invalid User ID!" });
     if (error.name === "ValidationError")
       return res
         .status(400)
@@ -71,10 +75,24 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
+    const { password } = req.body;
+
+    //Validate request data
+    if (!password) {
+      return res
+        .status(400)
+        .json({ error: "User password is required!" });
+    }
+
     const user = await User.findById(id);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: "User not found!" });
     }
+
+    // Check that the user passed valid password
+    let isValidPassword = await checkPassword(password, user.hashedPassword);
+	  if (!isValidPassword)
+		  return res.status(403).json({ error: "Invalid Password!" });
 
     await user.deleteOne();
     res.status(204).json({ success: "User deleted successfully" });
