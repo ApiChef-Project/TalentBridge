@@ -14,8 +14,8 @@ const API_PORT = process.env.API_PORT || 3000;
 
 // connecting to mongoDB
 connectMongoDB(DB_URI).then(() => {
-  // starting the express server
-  app.listen(API_PORT, () => {
-    console.log(`Server is listening on http://localhost:${API_PORT}`);
-  });
-})
+	// starting the express server
+	app.listen(API_PORT, () => {
+		console.log(`Server is listening on http://localhost:${API_PORT}`);
+	});
+});

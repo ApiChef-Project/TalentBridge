@@ -13,7 +13,7 @@ export const user2payload = {
 	password: "anas456",
 };
 export const company1payload = {
-	name:'Google Inc',
+	name: "Google Inc",
 	description: "this is description",
 	email: "google@gmail.com",
 	password: "google123",

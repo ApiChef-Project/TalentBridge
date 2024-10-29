@@ -16,52 +16,53 @@ import Application from "./application.model.js";
  * @property {Object} timestamps - Automatically adds createdAt and updatedAt timestamps to the schema.
  */
 export const userSchema = new mongoose.Schema(
-  {
-    firstName: {
-      type: String,
-      required: [true, "firstName is required"],
-    },
+	{
+		firstName: {
+			type: String,
+			required: [true, "firstName is required"],
+		},
 
-    lastName: {
-      type: String,
-      required: [true, "lastName is required"],
-    },
+		lastName: {
+			type: String,
+			required: [true, "lastName is required"],
+		},
 
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      validate: {
-        validator: validator.isEmail,
-        message: (props) => `${props.value} is not a valid email!`,
-      },
-    },
-    phone: {
-      type: String,
-      default: "",
-      validate: {
-        validator: validator.isMobilePhone,
-        message: (props) => `${props.value} is not a valid phone number!`,
-      },
-    },
+		email: {
+			type: String,
+			required: true,
+			unique: true,
+			validate: {
+				validator: validator.isEmail,
+				message: (props) => `${props.value} is not a valid email!`,
+			},
+		},
+		phone: {
+			type: String,
+			default: "",
+			validate: {
+				validator: validator.isMobilePhone,
+				message: (props) =>
+					`${props.value} is not a valid phone number!`,
+			},
+		},
 
-    hashedPassword: {
-      type: String,
-      required: [true, "password is required"],
-    },
+		hashedPassword: {
+			type: String,
+			required: [true, "password is required"],
+		},
 
-    applications: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "Application",
-      default: [],
-    },
+		applications: {
+			type: [mongoose.Schema.Types.ObjectId],
+			ref: "Application",
+			default: [],
+		},
 
-    refreshToken: {
-      type: String,
-      default: "",
-    },
-  },
-  { timestamps: true },
+		refreshToken: {
+			type: String,
+			default: "",
+		},
+	},
+	{ timestamps: true }
 );
 
 /**
@@ -72,20 +73,20 @@ export const userSchema = new mongoose.Schema(
  * @param {Function} next - The next middleware function in the stack.
  */
 userSchema.pre(
-  "deleteOne",
-  { document: true, query: false },
-  async function (next) {
-    try {
-      const userId = this._id;
+	"deleteOne",
+	{ document: true, query: false },
+	async function (next) {
+		try {
+			const userId = this._id;
 
-      // Delete all applications associated with this user
-      await Application.deleteMany({ user: userId });
+			// Delete all applications associated with this user
+			await Application.deleteMany({ user: userId });
 
-      next();
-    } catch (error) {
-      next(error);
-    }
-  },
+			next();
+		} catch (error) {
+			next(error);
+		}
+	}
 );
 
 /**

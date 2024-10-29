@@ -1,11 +1,11 @@
 import { Router } from "express";
 import {
-  deleteMe,
-  getMe,
-  loginUser,
-  logoutUser,
-  signupUser,
-  updateMe,
+	deleteMe,
+	getMe,
+	loginUser,
+	logoutUser,
+	signupUser,
+	updateMe,
 } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 

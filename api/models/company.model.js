@@ -14,54 +14,55 @@ import Job from "./job.model.js";
  * @property {Object} timestamps - Automatically adds createdAt and updatedAt timestamps to the schema.
  */
 export const companySchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+	{
+		name: {
+			type: String,
+			required: true,
+			unique: true,
+		},
 
-    description: {
-      type: String,
-      required: true,
-    },
+		description: {
+			type: String,
+			required: true,
+		},
 
-    //NOTE: superadmin authentication
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      validate: {
-        validator: validator.isEmail,
-        message: (props) => `${props.value} is not a valid email!`,
-      },
-    },
+		//NOTE: superadmin authentication
+		email: {
+			type: String,
+			required: true,
+			unique: true,
+			lowercase: true,
+			validate: {
+				validator: validator.isEmail,
+				message: (props) => `${props.value} is not a valid email!`,
+			},
+		},
 
-    // the super password, needed for updating and deleting company
-    hashedPassword: {
-      type: String,
-      minLength: 8,
-      required: true,
-    },
+		// the super password, needed for updating and deleting company
+		hashedPassword: {
+			type: String,
+			minLength: 8,
+			required: true,
+		},
 
-    // can do everything else
-    authorizedEmails: {
-      type: [String],
-      required: true,
-      lowercase: true,
-      default: [],
-    },
+		// can do everything else
+		authorizedEmails: {
+			type: [String],
+			required: true,
+			lowercase: true,
+			default: [],
+		},
 
-    phone: {
-      type: String,
-      validate: {
-        validator: validator.isMobilePhone,
-        message: (props) => `${props.value} is not a valid phone number!`,
-      },
-    },
-  },
-  { timestamps: true },
+		phone: {
+			type: String,
+			validate: {
+				validator: validator.isMobilePhone,
+				message: (props) =>
+					`${props.value} is not a valid phone number!`,
+			},
+		},
+	},
+	{ timestamps: true }
 );
 
 /**
@@ -72,22 +73,22 @@ export const companySchema = new mongoose.Schema(
  * @param {Function} next - The next middleware function in the stack.
  */
 companySchema.pre("deleteOne", async function (next) {
-  try {
-    const filter = this.getQuery(); // Get the filter used for deleteOne
-    //
-    const company = await Company.findOne(filter);
+	try {
+		const filter = this.getQuery(); // Get the filter used for deleteOne
+		//
+		const company = await Company.findOne(filter);
 
-    const companyId = company._id;
+		const companyId = company._id;
 
-    // Delete all jobs associated with this company
-    const jobs = await Job.find({ company: companyId }).exec();
-    for (const job of jobs) {
-      await job.deleteOne();
-    }
-    next();
-  } catch (error) {
-    next(error);
-  }
+		// Delete all jobs associated with this company
+		const jobs = await Job.find({ company: companyId }).exec();
+		for (const job of jobs) {
+			await job.deleteOne();
+		}
+		next();
+	} catch (error) {
+		next(error);
+	}
 });
 /**
  * The Company model based on the companySchema.

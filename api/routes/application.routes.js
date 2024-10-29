@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
-  createApplication,
-  deleteApplication,
-  fetchApplication,
-  fetchApplications,
-  updateApplication,
+	createApplication,
+	deleteApplication,
+	fetchApplication,
+	fetchApplications,
+	updateApplication,
 } from "../controllers/application.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 

@@ -18,74 +18,74 @@ import Application from "./application.model.js";
  * @property {Object} timestamps - Automatically adds createdAt and updatedAt timestamps to the schema.
  */
 export const jobSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: true,
-    },
+	{
+		title: {
+			type: String,
+			required: true,
+		},
 
-    type: {
-      type: String,
-      required: true,
-      enum: ["Remote", "Part-Time", , "Full-Time", "Hybrid"],
-    },
+		type: {
+			type: String,
+			required: true,
+			enum: ["Remote", "Part-Time", , "Full-Time", "Hybrid"],
+		},
 
-    description: {
-      type: String,
-      required: true,
-    },
+		description: {
+			type: String,
+			required: true,
+		},
 
-    salaryRange: {
-      type: String,
-      enum: [
-        "Not Specified",
-        "Under $50K",
-        "$50K - 60K",
-        "$60K - 70K",
-        "$70K - 80K",
-        "$80K - 90K",
-        "$90K - 100K",
-        "$100K - 125K",
-        "$125K - 150K",
-        "$150K - 175K",
-        "$175K - 200K",
-        "Over $200K",
-      ],
-      default: "Not Specified",
-    },
+		salaryRange: {
+			type: String,
+			enum: [
+				"Not Specified",
+				"Under $50K",
+				"$50K - 60K",
+				"$60K - 70K",
+				"$70K - 80K",
+				"$80K - 90K",
+				"$90K - 100K",
+				"$100K - 125K",
+				"$125K - 150K",
+				"$150K - 175K",
+				"$175K - 200K",
+				"Over $200K",
+			],
+			default: "Not Specified",
+		},
 
-    country: {
-      type: String,
-      required: true,
-      index: true,
-    },
+		country: {
+			type: String,
+			required: true,
+			index: true,
+		},
 
-    location: {
-      type: String,
-      required: true,
-      index: true,
-    },
+		location: {
+			type: String,
+			required: true,
+			index: true,
+		},
 
-    expiresAt: {
-      type: Date,
-      default: () => new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-      required: true,
-    },
+		expiresAt: {
+			type: Date,
+			default: () => new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+			required: true,
+		},
 
-    company: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
-      required: true,
-      index: true,
-    },
+		company: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Company",
+			required: true,
+			index: true,
+		},
 
-    applications: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "Application",
-      default: [],
-    },
-  },
-  { timestamps: true },
+		applications: {
+			type: [mongoose.Schema.Types.ObjectId],
+			ref: "Application",
+			default: [],
+		},
+	},
+	{ timestamps: true }
 );
 
 /**
@@ -96,20 +96,20 @@ export const jobSchema = new mongoose.Schema(
  * @param {Function} next - The next middleware function in the stack.
  */
 jobSchema.pre(
-  "deleteOne",
-  { document: true, query: false },
-  async function (next) {
-    try {
-      const jobId = this._id;
+	"deleteOne",
+	{ document: true, query: false },
+	async function (next) {
+		try {
+			const jobId = this._id;
 
-      // Delete all applications associated with this job
-      await Application.deleteMany({ job: jobId });
+			// Delete all applications associated with this job
+			await Application.deleteMany({ job: jobId });
 
-      next();
-    } catch (error) {
-      next(error);
-    }
-  },
+			next();
+		} catch (error) {
+			next(error);
+		}
+	}
 );
 
 /**
@@ -120,22 +120,22 @@ jobSchema.pre(
  * @param {Function} next - The next middleware function in the stack.
  */
 jobSchema.pre(
-  "deleteMany",
-  { document: true, query: false },
-  async function (next) {
-    try {
-      const filter = this.getFilter();
-      const jobs = await Job.find(filter).exec();
-      const jobIds = jobs.map((job) => job._id);
+	"deleteMany",
+	{ document: true, query: false },
+	async function (next) {
+		try {
+			const filter = this.getFilter();
+			const jobs = await Job.find(filter).exec();
+			const jobIds = jobs.map((job) => job._id);
 
-      // Batch delete applications with one query
-      await Application.deleteMany({ job: { $in: jobIds } });
+			// Batch delete applications with one query
+			await Application.deleteMany({ job: { $in: jobIds } });
 
-      next();
-    } catch (error) {
-      next(error);
-    }
-  },
+			next();
+		} catch (error) {
+			next(error);
+		}
+	}
 );
 
 /**

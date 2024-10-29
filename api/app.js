@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
-  res.status(200).json({ status: "OK" });
+	res.status(200).json({ status: "OK" });
 });
 
 // app.use("/users", userRoutes);

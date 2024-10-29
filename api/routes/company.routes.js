@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
-  deleteCompany,
-  fetchCompanies,
-  fetchCompany,
-  registerCompany,
-  updateCompany,
+	deleteCompany,
+	fetchCompanies,
+	fetchCompany,
+	registerCompany,
+	updateCompany,
 } from "../controllers/company.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 

@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
-  createJob,
-  deleteJob,
-  fetchJob,
-  fetchJobs,
-  updateJob,
+	createJob,
+	deleteJob,
+	fetchJob,
+	fetchJobs,
+	updateJob,
 } from "../controllers/job.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
