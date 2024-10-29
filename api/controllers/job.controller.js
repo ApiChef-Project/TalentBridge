@@ -110,11 +110,26 @@ export const deleteJob = async (req, res) => {
 export const updateJob = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, salaryRange, type, description, country, location } =
-      req.body;
+    const {
+      title,
+      salaryRange,
+      type,
+      description,
+      country,
+      location,
+      company_id,
+    } = req.body;
 
     // Validate request data
-    if (!title || !type || !description || !country || !location) {
+    if (
+      !title ||
+      !type ||
+      !description ||
+      !salaryRange ||
+      !country ||
+      !location ||
+      !company_id
+    ) {
       return res.status(400).json({ error: "All fields are required" });
     }
     const job = await Job.findById(id);
@@ -136,6 +151,7 @@ export const updateJob = async (req, res) => {
     job.country = country;
     job.location = location;
     job.salaryRange = salaryRange;
+    job.company = company;
 
     await job.save();
     res.status(200).json(job);
