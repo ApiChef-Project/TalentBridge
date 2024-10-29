@@ -6,22 +6,23 @@ import {
   fetchApplications,
   updateApplication,
 } from "../controllers/application.controller.js";
+import { protectRoute } from "../middleware/auth.middleware.js";
 
 const applicationRoutes = Router();
 
 // GET all applications
-applicationRoutes.get("/", fetchApplications);
+applicationRoutes.get("/", protectRoute, fetchApplications);
 
 // GET application by id
-applicationRoutes.get("/:id", fetchApplication);
+applicationRoutes.get("/:id", protectRoute, fetchApplication);
 
 // POST create a application
-applicationRoutes.post("/", createApplication);
+applicationRoutes.post("/", protectRoute, createApplication);
 
 // PUT update an application
-applicationRoutes.put("/:id", updateApplication);
+applicationRoutes.put("/:id", protectRoute, updateApplication);
 
 // DELETE delete an application
-applicationRoutes.delete("/:id", deleteApplication);
+applicationRoutes.delete("/:id", protectRoute, deleteApplication);
 
 export default applicationRoutes;

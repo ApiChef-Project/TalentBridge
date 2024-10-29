@@ -9,7 +9,10 @@ import User from "../models/user.model.js";
  */
 export const fetchApplications = async (req, res) => {
   try {
-    const applications = await Application.find({});
+    //
+    const user = req.user._id;
+    const applications = await Application.find({ user });
+    //
     res.status(200).json(applications);
   } catch (error) {
     console.error(`GET all applications Controller Error: ${error.message}`);
@@ -24,8 +27,11 @@ export const fetchApplications = async (req, res) => {
  */
 export const fetchApplication = async (req, res) => {
   try {
+    //
+    const user = req.user._id;
+    //
     const { id } = req.params;
-    const application = await Application.findOne({ _id: id });
+    const application = await Application.findOne({ _id: id, user });
     if (!application) {
       return res.status(404).json({ error: "Application not found" });
     }
@@ -45,16 +51,14 @@ export const fetchApplication = async (req, res) => {
  */
 export const createApplication = async (req, res) => {
   try {
-    const { user_id, job_id, resume, coverLetter } = req.body;
+    //
+    const user = req.user._id;
+    //
+    const { job_id, resume, coverLetter } = req.body;
 
     // Validate request data
-    if (!user_id || !job_id || !resume) {
+    if (!job_id || !resume) {
       return res.status(400).json({ error: "All fields are required" });
-    }
-
-    const user = await User.findById(user_id);
-    if (!user) {
-      return res.status(400).json({ error: "User Not Found" });
     }
 
     const job = await Job.findById(job_id);
@@ -78,11 +82,14 @@ export const createApplication = async (req, res) => {
 
     await newApplication.save();
 
-    // Associate application to user and job
-    await user.applications.push(newApplication._id);
-    await user.save();
-    await job.applications.push(newApplication._id);
-    await job.save();
+    await User.updateOne(
+      { _id: user },
+      { $push: { applications: newApplication._id } },
+    );
+    await Job.updateOne(
+      { _id: job_id },
+      { $push: { applications: newApplication._id } },
+    );
 
     res.status(201).json(newApplication);
   } catch (error) {
@@ -105,18 +112,32 @@ export const createApplication = async (req, res) => {
 export const updateApplication = async (req, res) => {
   try {
     const { id } = req.params;
-    const { resume, coverLetter } = req.body;
+    //
+    const user = req.user._id;
+    //
+    const { resume, coverLetter /*, job_id **/ } = req.body;
 
     // Validate request data
-    if (!resume) {
+    if (/*!job_id || */ !resume) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
     const application = await Application.findById(id);
-    if (!application) return res.status(404).json({ error: "Job Not Found" });
+    if (!application)
+      return res.status(404).json({ error: "Application Not Found" });
+    // Validate request data
+
+    // const job = await Job.findById(job_id);
+    // if (!job) {
+    //   return res.status(400).json({ error: "Job Not Found" });
+    // }
+
+    //Check if current user owns the application
+    if (String(application.user) !== String(user)) return res.sendStatus(403);
 
     application.resume = resume;
     application.coverLetter = coverLetter;
+    // application.job = job_id
     await application.save();
 
     res.status(200).json(application);
@@ -138,11 +159,16 @@ export const updateApplication = async (req, res) => {
  * @param {Object} res - Express response object.
  */
 export const deleteApplication = async (req, res) => {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
+    const user = req.user._id;
     const application = await Application.findOne({ _id: id });
     if (!application)
       return res.status(400).json({ error: "Application Not Found" });
+
+    //Check if user owns application
+    if (String(application.user) !== String(user)) return res.sendStatus(403);
+
     const result = await application.deleteOne();
     return res
       .status(204)
