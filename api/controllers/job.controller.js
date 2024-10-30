@@ -1,6 +1,13 @@
 import Job from "../models/job.model.js";
 import Company from "../models/company.model.js";
 
+/**
+ * GET /jobs
+ * Returns an array of all job listings.
+ * @function
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const fetchJobs = async (req, res) => {
 	try {
 		const jobs = await Job.find({});
@@ -11,6 +18,13 @@ export const fetchJobs = async (req, res) => {
 	}
 };
 
+/**
+ * GET /jobs/:id
+ * Retrieves a job listing by its ID.
+ * @param {Object} req - Express request object containing the job ID in params.
+ * @param {Object} res - Express response object used to return the job data or an error.
+ * @throws {Error} If job is not found or an invalid ID is provided, returns a 404 or 400 status respectively.
+ */
 export const fetchJob = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -27,6 +41,19 @@ export const fetchJob = async (req, res) => {
 	}
 };
 
+/**
+ * POST /jobs
+ * Creates a new job listing.
+ * The user that makes the request must be logged in.
+ * The user who makes the request must be authorized by the company.
+ * The request body must contain all required fields.
+ * Returns the newly created job listing.
+ * @param {Object} req - Express request object containing the job data in the body.
+ * @param {Object} res - Express response object used to return the job data or an error.
+ * @throws {Error} If the request body is missing a required field, returns a 400 status.
+ * @throws {Error} If the user is not authorized by the company, returns a 403 status.
+ * @throws {Error} If an internal error occurs, returns a 500 status.
+ */
 export const createJob = async (req, res) => {
 	try {
 		const {
@@ -85,6 +112,19 @@ export const createJob = async (req, res) => {
 	}
 };
 
+/**
+ * DELETE /jobs/:id
+ * Deletes a job listing by its ID.
+ * The user that makes the request must be logged in.
+ * The user who makes the request must be authorized by the company.
+ * Returns a success message if the job was deleted successfully.
+ * @param {Object} req - Express request object containing the job ID in params.
+ * @param {Object} res - Express response object used to return a success message or an error.
+ * @throws {Error} If job is not found, returns a 400 status.
+ * @throws {Error} If the user is not authorized by the company, returns a 403 status.
+ * @throws {Error} If an invalid ID is provided, returns a 400 status.
+ * @throws {Error} If an internal error occurs, returns a 500 status.
+ */
 export const deleteJob = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -107,6 +147,20 @@ export const deleteJob = async (req, res) => {
 	}
 };
 
+/**
+ * PUT /jobs/:id
+ * Updates a job listing by its ID.
+ * The user that makes the request must be logged in.
+ * The user who makes the request must be authorized by the company.
+ * The request body must contain all required fields.
+ * Returns the updated job listing.
+ * @param {Object} req - Express request object containing the job ID in params and the updated job data in the body.
+ * @param {Object} res - Express response object used to return the job data or an error.
+ * @throws {Error} If job is not found, returns a 404 status.
+ * @throws {Error} If the user is not authorized by the company, returns a 403 status.
+ * @throws {Error} If an invalid ID is provided, returns a 400 status.
+ * @throws {Error} If an internal error occurs, returns a 500 status.
+ */
 export const updateJob = async (req, res) => {
 	try {
 		const { id } = req.params;

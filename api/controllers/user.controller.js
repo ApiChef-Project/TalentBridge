@@ -1,6 +1,14 @@
 import { checkPassword, hashPassword } from "../lib/utils.js";
 import User from "../models/user.model.js";
 
+/**
+ * Handles a GET request to fetch all users.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ *
+ * @throws {Error} If there is an issue retrieving all users.
+ */
 export const fetchAllUsers = async (req, res) => {
 	try {
 		const users = await User.find({}).select("-hashedPassword");
@@ -11,6 +19,14 @@ export const fetchAllUsers = async (req, res) => {
 	}
 };
 
+/**
+ * GET /users/:id
+ * Fetches a single user by ID without hashed password.
+ *
+ * @throws {Error} If the user is not found.
+ * @throws {Error} If the given ID is invalid.
+ * @throws {Error} If there is an unexpected error.
+ */
 export const fetchUser = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -27,6 +43,23 @@ export const fetchUser = async (req, res) => {
 	}
 };
 
+/**
+ * Handles a PUT request to update a user by ID.
+ *
+ * @param {Object} req - The request object.
+ * @param {string} req.params.id - The ID of the user to be updated.
+ * @param {Object} req.body - The body of the request that must contain the user's profile information.
+ * @param {string} req.body.firstName - The first name of the user.
+ * @param {string} req.body.lastName - The last name of the user.
+ * @param {string} req.body.email - The email of the user.
+ * @param {string} req.body.phone - The phone number of the user.
+ * @param {string} req.body.password - The current password of the user.
+ * @param {Object} res - The response object.
+ *
+ * @throws {Error} If the request data is invalid.
+ * @throws {Error} If the user could not be found with the given ID.
+ * @throws {Error} If the user could not be updated.
+ */
 export const updateUser = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -75,6 +108,19 @@ export const updateUser = async (req, res) => {
 	}
 };
 
+/**
+ * Handles a DELETE request to delete a user by its ID.
+ *
+ * @param {Object} req - The request object.
+ * @param {string} req.user._id - The ID of the user to be deleted.
+ * @param {Object} req.body - The body of the request that must contain the user's password.
+ * @param {string} req.body.password - The password of the user to be deleted.
+ * @param {Object} res - The response object.
+ *
+ * @throws {Error} If the request data is invalid.
+ * @throws {Error} If the user could not be found with the given ID.
+ * @throws {Error} If the user could not be deleted.
+ */
 export const deleteUser = async (req, res) => {
 	try {
 		const { id } = req.params;
