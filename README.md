@@ -19,8 +19,8 @@ A RESTful API for managing job listings and applications, built with Node.js, Ex
 - **Backend**: Node.js, Express
 - **Database**: MongoDB (Mongoose)
 - **Authentication**: JSON Web Tokens (JWT)
-- **Validation**: Joi for request validation
-- **Building and Documentation**: Postman 
+- **Validation**: Validator
+- **Building, Documentation and API Testing**: Postman
 - **Version Control**: Git, GitHub
 - **Testing**: Jest and Supatest
 - **Deployment**: Render
@@ -53,7 +53,7 @@ A RESTful API for managing job listings and applications, built with Node.js, Ex
 4. Create a `.env` file in the root directory and add the following environment variables:
 
     ```env
-    PORT=5000
+    PORT=3000
     MONGO_URI=your_mongo_database_uri
     JWT_SECRET=your_secret_key
     ```
@@ -64,91 +64,186 @@ A RESTful API for managing job listings and applications, built with Node.js, Ex
     npm run dev
     ```
 
-6. Your API should now be running at `http://localhost:5000`.
+6. Your API should now be running at `http://localhost:3000`.
 
 ## API Endpoints
 
-### Authentication
+### What an unauthenticated user can do:
+### User related
 
-- **POST** `/api/auth/register`: Register a new user.
-- **POST** `/api/auth/login`: Login a user.
+- ```POST /auth/signup```
 
-### Jobs
+### Company related
 
-- **GET** `/api/jobs`: Get all job listings (paginated).
-- **GET** `/api/jobs/:id`: Get a single job listing by ID.
-- **POST** `/api/jobs`: Create a new job.
-- **PUT** `/api/jobs/:id`: Update a job listing.
-- **DELETE** `/api/jobs/:id`: Delete a job listing.
+- ```GET /companies```
+- ```GET /companies/:id```
 
-### Job Applications
+### Jobs related
 
-- **POST** `/api/jobs/:id/apply`: Apply for a job.
+- ```GET /jobs```
+- ```GET /jobs/:id```
+- ```GET /jobs/search```
 
-## Example Request
+### Protected Routes
+The following endpoints require a logged in client
 
-**Create a Job**:
+### User related
 
-```bash
-POST /api/jobs
-```
+- ```GET /auth/me```
+- ```GET /auth/updateMe```
+- ```GET /auth/deleteMe```
+- ```POST /auth/logout```
 
-Request Body:
+### Company related
+
+- ```POST /companies```
+- ```PUT /companies/:id```
+- ```DELETE /companies/:id```
+
+### Company-Application interactions (protected)
+-  ```GET companies/company_id/jobs/job_id/applications```
+-  ```POST companies/company_id/jobs/job_id/applications/accept```
+-  ```POST companies/company_id/jobs/job_id/applications/review```
+-  ```POST companies/company_id/jobs/job_id/applications/review```
+
+
+### Jobs related
+
+- ```POST /jobs```
+- ```PUT /jobs/:id```
+- ```DELETE /jobs/:id```
+
+### Applications
+
+- ```GET /applications```
+- ```GET /applications/:id```
+- ```POST /applications```
+- ```PUT /applications/:id```
+- ```DELETE /applications/:id```
+
+
+## Example Objects
+The basic structure of the mongoose objects in these project are as follows
+
+### User Object
 
 ```json
 {
-  "title": "Software Engineer",
-  "company": "Tech Corp",
-  "location": "New York",
-  "description": "We are looking for a skilled software engineer...",
-  "salary": 100000
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "johndoe@email.com",
+    "phone": "878-593-4766",
+    "hashedPassword": "$2a$10$dNKgJh93FrUsfoMB7TbkWe.L/31B0LIMaxfhN3/GUIjceskVKm9Be",
+    "applications": [ "6721cc78012a956141050061" ],
+    "refreshToken": "",
+    "_id": "671f605444ff4e47ed0d63c2",
+    "createdAt": "2024-10-28T09:58:44.812Z",
+    "updatedAt": "2024-10-28T09:58:44.812Z",
+    "__v": 0
 }
+
 ```
 
-Response:
+### Company Object
 
 ```json
 {
-  "success": true,
-  "data": {
-    "_id": "609a8f807f456e2c5b7b3e0d",
-    "title": "Software Engineer",
-    "company": "Tech Corp",
-    "location": "New York",
-    "description": "We are looking for a skilled software engineer...",
-    "salary": 100000,
-    "createdAt": "2023-10-15T10:00:00Z"
-  }
+    "name": "Meta",
+    "description": "Company that specialises in data and targeted social media marketing.",
+    "email": "meta@meta.com",
+    "authorizedEmails": [
+        "johndoe@email.com"
+    ],
+    "phone": "599-965-5396",
+    "_id": "671faa8dc6e4a771a590d3fa",
+    "createdAt": "2024-10-28T15:15:25.935Z",
+    "updatedAt": "2024-10-28T15:15:25.935Z",
+    "__v": 0
 }
+
 ```
+
+### Job Object
+
+```json
+{
+    "title": "Junior Frontend Engineer",
+    "type": "Remote",
+    "description": "A Junior Frontend Developer skilled in creating responsive and user-friendly interfaces. Proficient in HTML, CSS, and JavaScript, with experience in frameworks like React to build dynamic web applications.",
+    "salaryRange": "Not Specified",
+    "country": "Kenya",
+    "location": "Nairobi",
+    "company":"6720669efd20bd50a1cb908d",
+    "applications": [ "6721cc78012a956141050061" ],
+    "_id": "672074aafd20bd50a1cb909b",
+    "expiresAt": "2025-10-29T05:37:46.665Z",
+    "createdAt": "2024-10-29T05:37:46.675Z",
+    "updatedAt": "2024-10-29T05:37:46.675Z",
+    "__v": 0
+}
+
+```
+
+### Application Object
+
+```json
+{
+    "_id": "6721cc78012a956141050061",
+    "user": "6721ca5a012a95614104fff0",
+    "job": "6721cb94012a956141050023",
+    "resume": "https://mason.name",
+    "status": "pending",
+    "createdAt": "2024-10-30T06:04:40.657Z",
+    "updatedAt": "2024-10-30T06:04:40.657Z",
+    "__v": 0
+}
+
+```
+
+
 
 ## Project Structure
 
 ```
-├── api/
-│   ├── config/
-│   │   └── db.js                       # MongoDB connection setup
-│   ├── controllers/
-│   │   ├── authController.js           # Authentication logic
-│   │   ├── jobsController.js           # Job-related logic
-│   │   └── applicationController.js    # Application logic
-│   ├── middlewares/
-│   │   ├── authMiddleware.js           # JWT Authentication middleware
-│   │   └── errorHandler.js             # Error handling middleware
-│   ├── models/
-│   │   ├── Job.js                      # Job model
-│   │   ├── User.js                     # User model
-│   │   └── Application.js              # Job application model
-│   ├── routes/
-│   │   ├── authRoutes.js               # Authentication routes
-│   │   ├── jobsRoutes.js               # Jobs routes
-│   │   └── applicationRoutes.js        # Job application routes
-│   ├──.env                             # Environment variables
-│   ├── app.js                          # Express app setup
-│   └── server.js                       # App entry point
-│
-├── README.md                           # README.md
-└── .gitignore                          # .gitignore
+.
+├── LICENSE
+├── NOTES.md
+├── README.md
+└── api
+    ├── app.js
+    ├── config
+    │   ├── connect.db.js
+    │   └── drop.db.js
+    ├── controllers
+    │   ├── application.controller.js
+    │   ├── auth.controller.js
+    │   ├── company.controller.js
+    │   ├── job.controller.js
+    │   └── user.controller.js
+    ├── lib
+    │   └── utils.js
+    ├── middleware
+    │   ├── application.middleware.js
+    │   ├── auth.middleware.js
+    │   ├── error.handler.js
+    │   ├── job.middleware.js
+    │   └── user.middleware.js
+    ├── models
+    │   ├── application.model.js
+    │   ├── company.model.js
+    │   ├── job.model.js
+    │   └── user.model.js
+    ├── nodemon.json
+    ├── package-lock.json
+    ├── package.json
+    ├── routes
+    │   ├── application.routes.js
+    │   ├── auth.routes.js
+    │   ├── company.routes.js
+    │   ├── job.routes.js
+    │   └── user.routes.js
+    ├── server.js
+    └── tests
 ```
 
 ## License
