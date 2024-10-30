@@ -1,5 +1,7 @@
 import { checkPassword, hashPassword } from "../lib/utils.js";
 import Company from "../models/company.model.js";
+import Job from "../models/job.model.js";
+import Application from "../models/application.model.js";
 
 export const fetchCompanies = async (req, res) => {
 	try {
@@ -99,10 +101,7 @@ export const updateCompany = async (req, res) => {
 				.status(403)
 				.json({ error: "User is not authorized by company" });
 		// Check that the user passed valid company password
-		let isValidPassword = await checkPassword(
-			password,
-			company.hashedPassword
-		);
+		let isValidPassword = await checkPassword(password, company.hashedPassword);
 		if (!isValidPassword)
 			return res.status(403).json({ error: "Invalid Password!" });
 
@@ -139,35 +138,151 @@ export const deleteCompany = async (req, res) => {
 
 		//Validate request data
 		if (!password) {
-			return res
-				.status(400)
-				.json({ error: "Company password is required" });
+			return res.status(400).json({ error: "Company password is required" });
 		}
 
 		const company = await Company.findById(id);
-		if (!company)
-			return res.status(400).json({ error: "Company Not Found" });
+		if (!company) return res.status(400).json({ error: "Company Not Found" });
 
 		// Check that the user is authorized by company
 		if (!company.authorizedEmails.includes(user.email))
 			return res.status(403).json({ error: "User is not authorized!" });
 		// Check that the user passed valid company password
-		let isValidPassword = await checkPassword(
-			password,
-			company.hashedPassword
-		);
+		let isValidPassword = await checkPassword(password, company.hashedPassword);
 		if (!isValidPassword)
 			return res.status(403).json({ error: "Invalid Password!" });
 
 		await company.deleteOne();
-		return res
-			.status(204)
-			.json({ success: "Successfully Deleted Company" });
+		return res.status(204).json({ success: "Successfully Deleted Company" });
 	} catch (error) {
 		if (error.name === "CastError")
 			return res.status(400).json({ error: "Invalid Company ID" });
+		console.error(`DELETE company by id Controller Error: ${error.message}`);
+		res.status(500).json({ error: "Internal Server Error" });
+	}
+};
+
+export const fetchJobApplications = async (req, res) => {
+	// "/:companyID/jobs/:jobID/applications",
+
+	try {
+		const { companyID, jobID } = req.params;
+		const user = req.user;
+
+		const company = await Company.findById(companyID);
+		if (!company) return res.status(400).json({ error: "Company Not Found" });
+
+		// Check that the user is authorized by company
+		if (!company.authorizedEmails.includes(user.email))
+			return res.status(403).json({ error: "User is not authorized!" });
+
+		const job = await Job.findOne({ company, _id: jobID });
+		if (!job) return res.status(400).json({ error: "Job Not Found" });
+
+		const applications = await Application.find({ job: jobID });
+		return res.status(200).json({ applications });
+	} catch (error) {
+		if (error.name === "CastError")
+			return res.status(400).json({ error: "Invalid Company or Job ID" });
 		console.error(
-			`DELETE company by id Controller Error: ${error.message}`
+			`GET applications to Company Job Controller Error: ${error.message}`,
+		);
+		res.status(500).json({ error: "Internal Server Error" });
+	}
+};
+
+export const fetchJobApplication = async (req, res) => {
+	// "/:companyID/jobs/:jobID/applications/:appID",
+
+	try {
+		const { companyID, jobID, appID } = req.params;
+		const user = req.user;
+
+		const company = await Company.findById(companyID);
+		if (!company) return res.status(400).json({ error: "Company Not Found" });
+
+		// Check that the user is authorized by company
+		if (!company.authorizedEmails.includes(user.email))
+			return res.status(403).json({ error: "User is not authorized!" });
+
+		const job = await Job.findOne({ company, _id: jobID });
+		if (!job) return res.status(400).json({ error: "Job Not Found" });
+
+		const application = await Application.find({ job: jobID, _id: appID });
+
+		return res.status(200).json(application);
+	} catch (error) {
+		if (error.name === "CastError")
+			return res
+				.status(400)
+				.json({ error: "Invalid Company or Job or Application ID" });
+		console.error(
+			`GET Application to Company Job Controller Error: ${error.message}`,
+		);
+		res.status(500).json({ error: "Internal Server Error" });
+	}
+};
+
+export const processJobApplication = async (req, res) => {
+	// "/:companyID/jobs/:jobID/applications/:appID/:action",
+
+	try {
+		const { companyID, jobID, appID, action } = req.params;
+		const user = req.user;
+
+		const company = await Company.findById(companyID);
+		if (!company) return res.status(400).json({ error: "Company Not Found" });
+
+		// Check that the user is authorized by company
+		if (!company.authorizedEmails.includes(user.email))
+			return res.status(403).json({ error: "User is not authorized!" });
+
+		const job = await Job.findOne({ company, _id: jobID });
+		if (!job) return res.status(400).json({ error: "Job Not Found" });
+
+		const app = await Application.findOne({ _id: appID });
+		if (!app) return res.status(400).json({ error: "Application Not Found" });
+
+		const enums = ["pending", "accepted", "rejected", "in-review"];
+		const allowedActions = ["accept", "reject", "review"];
+
+		if (!allowedActions.includes(action.toLowerCase())) {
+			return res
+				.status(400)
+				.json({ error: "Invalid Action", "allowed actions": allowedActions });
+		}
+
+		let newStatus;
+		switch (action.toLowerCase()) {
+			case "accept":
+				newStatus = "accepted";
+				break;
+			case "reject":
+				newStatus = "rejected";
+				break;
+			case "review":
+				newStatus = "in-review";
+				break;
+			default:
+				newStatus = "pending";
+		}
+
+		const updatedApp = await Application.findOneAndUpdate(
+			{ _id: appID, job: jobID },
+			{ $set: { status: newStatus } },
+			{ new: true },
+		);
+		res.status(200).json({
+			message: "Application status updated successfully",
+			application: updatedApp,
+		});
+	} catch (error) {
+		if (error.name === "CastError")
+			return res
+				.status(400)
+				.json({ error: "Invalid Company or Job or Application ID" });
+		console.error(
+			`PATCH Application to Company Job Controller Error: ${error.message}`,
 		);
 		res.status(500).json({ error: "Internal Server Error" });
 	}

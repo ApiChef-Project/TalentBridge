@@ -3,6 +3,9 @@ import {
 	deleteCompany,
 	fetchCompanies,
 	fetchCompany,
+	fetchJobApplication,
+	fetchJobApplications,
+	processJobApplication,
 	registerCompany,
 	updateCompany,
 } from "../controllers/company.controller.js";
@@ -24,5 +27,25 @@ companyRoutes.put("/:id", protectRoute, updateCompany);
 
 // DELETE company by ID
 companyRoutes.delete("/:id", protectRoute, deleteCompany);
+
+// GET all user applications to job listing
+companyRoutes.get(
+	"/:companyID/jobs/:jobID/applications",
+	protectRoute,
+	fetchJobApplications,
+);
+
+// GET User application by ID
+companyRoutes.get(
+	"/:companyID/jobs/:jobID/applications/:appID",
+	protectRoute,
+	fetchJobApplication,
+);
+
+companyRoutes.post(
+	"/:companyID/jobs/:jobID/applications/:appID/:action",
+	protectRoute,
+	processJobApplication,
+);
 
 export default companyRoutes;
