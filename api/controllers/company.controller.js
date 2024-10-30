@@ -3,6 +3,10 @@ import Company from "../models/company.model.js";
 import Job from "../models/job.model.js";
 import Application from "../models/application.model.js";
 
+/**
+ * GET /companies
+ * Returns all companies without hashed passwords.
+ */
 export const fetchCompanies = async (req, res) => {
 	try {
 		const companies = await Company.find({}).select("-hashedPassword");
@@ -13,6 +17,10 @@ export const fetchCompanies = async (req, res) => {
 	}
 };
 
+/**
+ * GET /companies/:id
+ * Returns a company by id without hashed password.
+ */
 export const fetchCompany = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -29,6 +37,13 @@ export const fetchCompany = async (req, res) => {
 	}
 };
 
+/**
+ * POST /companies
+ * Creates a new company if the email is not already taken.
+ * The user that makes the request must be logged in.
+ * The user who makes the request is automatically added to the authorized emails.
+ * Returns a company object without the hashed password.
+ */
 export const registerCompany = async (req, res) => {
 	try {
 		const { name, description, email, password, phone } = req.body;
@@ -74,6 +89,14 @@ export const registerCompany = async (req, res) => {
 	}
 };
 
+/**
+ * PUT /companies/:id
+ * Updates a company by id, if the email is not already taken.
+ * The user that makes the request must be logged in.
+ * The user who makes the request must be authorized by the company.
+ * The user who makes the request must pass the valid company password.
+ * Returns a company object without the hashed password.
+ */
 export const updateCompany = async (req, res) => {
 	try {
 		const user = req.user;
@@ -130,6 +153,14 @@ export const updateCompany = async (req, res) => {
 	}
 };
 
+/**
+ * DELETE /companies/:id
+ * Deletes a company by id, if the user is authorized and the user passed valid company password.
+ * The user that makes the request must be logged in.
+ * The user who makes the request must be authorized by the company.
+ * The user who makes the request must pass the valid company password.
+ * Returns a message of success if the company was deleted successfully.
+ */
 export const deleteCompany = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -162,6 +193,13 @@ export const deleteCompany = async (req, res) => {
 	}
 };
 
+/**
+ * GET /companies/:companyID/jobs/:jobID/applications
+ * Returns all applications to a job listing by jobID in a company.
+ * The user that makes the request must be logged in.
+ * The user who makes the request must be authorized by the company.
+ * Returns an array of application objects.
+ */
 export const fetchJobApplications = async (req, res) => {
 	// "/:companyID/jobs/:jobID/applications",
 
@@ -191,6 +229,13 @@ export const fetchJobApplications = async (req, res) => {
 	}
 };
 
+/**
+ * GET /companies/:companyID/jobs/:jobID/applications/:appID
+ * Returns the application with ID appID to a job listing by jobID in a company.
+ * The user that makes the request must be logged in.
+ * The user who makes the request must be authorized by the company.
+ * Returns the application object.
+ */
 export const fetchJobApplication = async (req, res) => {
 	// "/:companyID/jobs/:jobID/applications/:appID",
 
@@ -223,6 +268,16 @@ export const fetchJobApplication = async (req, res) => {
 	}
 };
 
+/**
+ * PATCH /companies/:companyID/jobs/:jobID/applications/:appID/:action
+ * Updates the status of an application to a job listing by jobID in a company.
+ * The user that makes the request must be logged in.
+ * The user who makes the request must be authorized by the company.
+ * The action parameter must be one of the allowed actions.
+ * Returns a message of success and the updated application object if the application status was updated successfully.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const processJobApplication = async (req, res) => {
 	// "/:companyID/jobs/:jobID/applications/:appID/:action",
 
