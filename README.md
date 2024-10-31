@@ -2,28 +2,28 @@
 
 A RESTful API for managing job listings and applications, built with Node.js, Express, and MongoDB.
 
-- [Presentation ](https://docs.google.com/presentation/d/1odEMsBKAUlZSC6HeYWYpQc2Z2_z-db2I/edit?usp=sharing&ouid=116546584301172370696&rtpof=true&sd=true)
+- [Project Presentation ](https://docs.google.com/presentation/d/1odEMsBKAUlZSC6HeYWYpQc2Z2_z-db2I/edit?usp=sharing&ouid=116546584301172370696&rtpof=true&sd=true)
 - [Project documentation](https://documenter.getpostman.com/view/38037353/2sAY4vi3mR)
 
 ## Features
 
 - **CRUD Operations**: Create, Read, Update, and Delete job listings.
-- **Job Search**: Search for jobs based on title, location, or company.
-- **Pagination**: Get job listings in paginated form.
 - **Apply for Jobs**: Submit job applications.
 - **Authentication**: User authentication (JWT-based).
 - **Role-based Access**: Admins can manage jobs, users can apply for jobs.
+<!-- - **Job Search**: Search for jobs based on title, location, or company.
+- **Pagination**: Get job listings in paginated form. -->
 
 ## Tech Stack
 
 - **Backend**: Node.js, Express
 - **Database**: MongoDB (Mongoose)
 - **Authentication**: JSON Web Tokens (JWT)
-- **Validation**: Validator
-- **Building, Documentation and API Testing**: Postman
+- **Documentation and API Testing**: Postman
 - **Version Control**: Git, GitHub
-- **Testing**: Jest and Supatest
-- **Deployment**: Render
+- **Testing**: Jest and supertest
+<!-- - **Validation**: Validator -->
+<!-- - **Deployment**: Render -->
 
 ## Requirements
 
@@ -82,7 +82,7 @@ A RESTful API for managing job listings and applications, built with Node.js, Ex
 
 - ```GET /jobs```
 - ```GET /jobs/:id```
-- ```GET /jobs/search```
+<!-- - ```GET /jobs/search``` -->
 
 ### Protected Routes
 The following endpoints require a logged in client
